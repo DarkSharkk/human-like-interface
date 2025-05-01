@@ -33,16 +33,6 @@ export const JitsiContainer = () => {
         // api.on('endpointTextMessageReceived', handleChatUpdates);
     };
 
-    // Очистка при размонтировании
-    useEffect(() => {
-        return () => {
-            if (jitsi) {
-                jitsi.removeListener('incomingMessage', handleChatUpdates);
-                jitsi.removeListener('outgoingMessage', handleChatUpdates);
-            }
-        };
-    }, [jitsi]);
-
     return (
         <div style={{ height: '60vh', width: '80vh' }}>
             <JitsiMeeting
@@ -56,15 +46,6 @@ export const JitsiContainer = () => {
                     iframe.style.height = '100%';
                 }}
             />
-
-            <div style={{ position: 'fixed', top: 20, right: 20, background: 'white', padding: '10px' }}>
-                <h3>Chat Messages:</h3>
-                <ul>
-                    {messages.map((msg, index) => (
-                        <li key={index}>{msg}</li>
-                    ))}
-                </ul>
-            </div>
         </div>
     );
 };
