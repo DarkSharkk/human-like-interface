@@ -74,39 +74,24 @@ const JitsiApp = ({ roomName = 'master', displayName = 'User1' }) => {
             apiRef.current = new window.JitsiMeetExternalAPI(domain, options);
             console.log('Jitsi API instance created');
 
-            // Подписываемся на события
-            apiRef.current.addListener('participantJoined', (data: any) => {
-                console.log('Участник присоединился:', data);
+            // Ждем полной инициализации конференции
+            apiRef.current.addListener('videoConferenceJoined', () => {
+                console.log('Conference fully initialized, adding event listeners');
+                
+                apiRef.current.addListener('participantJoined', (data: any) => {
+                    console.log('Участник присоединился:', data);
+                });
+
+                apiRef.current.addListener('participantLeft', (data: any) => {
+                    console.log('Участник вышел:', data);
+                });
+
+                apiRef.current.addListener('incomingMessage', (obj: IncomingMessage) => {
+                    console.log('---incomingMessage---', obj);
+                });
+
+                console.log('All event listeners added');
             });
-
-            apiRef.current.addListener('participantLeft', (data: any) => {
-                console.log('Участник вышел:', data);
-            });
-
-            // Подписываемся на все возможные события чата
-            apiRef.current.addListener('incomingMessage', (obj: IncomingMessage) => {
-                console.log('---incomingMessage---', obj);
-            });
-
-            apiRef.current.addListener('message', (obj: any) => {
-                console.log('---message event---', obj);
-            });
-
-            apiRef.current.addListener('chatMessage', (obj: any) => {
-                console.log('---chatMessage event---', obj);
-            });
-
-            // Добавляем тестовое сообщение через 5 секунд после инициализации
-            setTimeout(() => {
-                try {
-                    console.log('Sending test message...');
-                    apiRef.current.executeCommand('sendChatMessage', 'Test message from API');
-                } catch (error) {
-                    console.error('Error sending test message:', error);
-                }
-            }, 5000);
-
-            console.log('All event listeners added');
 
         } catch (error) {
             console.error('Ошибка при запуске Jitsi:', error);
