@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 declare global {
     interface Window {
@@ -12,9 +12,35 @@ type IncomingMessage = {
     nick: string;
 };
 
-const JitsiApp = ({ roomName = 'master', displayName = 'User1' }) => {
+const JitsiApp = ({ roomName = 'miemmaster', displayName = 'User1' }) => {
     const jitsiContainerRef = useRef<HTMLDivElement>(null);
     const apiRef = useRef<any>(null);
+    const [gigaResponse, setGigaResponse] = useState<string>('');
+
+    useEffect(() => {
+        // Обработчик ответов от GigaChat
+        const handleGigaResponse = (event: MessageEvent) => {
+            if (event.source !== window || !event.data.type) return;
+
+            switch (event.data.type) {
+                case "GIGACHAT_RESPONSE":
+                    // Отправляем ответ обратно в чат Jitsi
+                    if (apiRef.current) {
+                        apiRef.current.executeCommand('sendChatMessage', event.data.response);
+                    }
+                    break;
+
+                case "GIGACHAT_ERROR":
+                    if (apiRef.current) {
+                        apiRef.current.executeCommand('sendChatMessage', `Ошибка: ${event.data.error}`);
+                    }
+                    break;
+            }
+        };
+
+        window.addEventListener("message", handleGigaResponse);
+        return () => window.removeEventListener("message", handleGigaResponse);
+    }, []);
 
     useEffect(() => {
         console.log('useEffect triggered');
@@ -35,7 +61,6 @@ const JitsiApp = ({ roomName = 'master', displayName = 'User1' }) => {
             document.body.appendChild(script);
         }
 
-        // Очистка при размонтировании компонента
         return () => {
             console.log('Cleaning up...');
             if (apiRef.current) {
@@ -88,6 +113,11 @@ const JitsiApp = ({ roomName = 'master', displayName = 'User1' }) => {
 
                 apiRef.current.addListener('incomingMessage', (obj: IncomingMessage) => {
                     console.log('---incomingMessage---', obj);
+                    // Отправляем сообщение в GigaChat
+                    window.postMessage({
+                        type: "REQUEST_TO_GIGACHAT",
+                        question: obj.message
+                    }, "*");
                 });
 
                 console.log('All event listeners added');
