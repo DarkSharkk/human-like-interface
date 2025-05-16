@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "GigaChat API Helper",
+  "version": "1.0",
+  "description": "Помощник для работы с GigaChat API",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "https://ngw.devices.sberbank.ru:9443/*",
+    "https://*.sberbank.ru/*",
+    "https://gigachat.devices.sberbank.ru/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://ngw.devices.sberbank.ru:9443/ https://gigachat.devices.sberbank.ru/"
+  }
+} 

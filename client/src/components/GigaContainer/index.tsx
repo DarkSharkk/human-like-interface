@@ -1,4 +1,4 @@
-import { SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const GigaContainer = () => {
     const [question, setQuestion] = useState('');
@@ -16,23 +16,24 @@ const GigaContainer = () => {
         e.preventDefault();
         if (!question.trim()) return;
 
-        // setIsLoading(true);
+        setIsLoading(true);
         askGigachat(question);
     };
 
     useEffect(() => {
-        const handleMessage = (event: any) => {
-            // Фильтруем только наши сообщения
+        const handleMessage = (event: MessageEvent) => {
+            // Проверяем, что сообщение от нашего расширения
             if (event.source !== window || !event.data.type) return;
 
             switch (event.data.type) {
                 case "GIGACHAT_RESPONSE":
                     setIsLoading(false);
-                    setAnswer(event.data.response || '-');
+                    setAnswer(event.data.response || '');
                     break;
 
                 case "GIGACHAT_ERROR":
                     setIsLoading(false);
+                    setAnswer(`Ошибка: ${event.data.error}`);
                     break;
 
                 default:
@@ -43,7 +44,6 @@ const GigaContainer = () => {
         window.addEventListener("message", handleMessage);
         return () => window.removeEventListener("message", handleMessage);
     }, []);
-
 
     return (
         <div>
@@ -59,7 +59,7 @@ const GigaContainer = () => {
                 />
 
                 <button type="submit" disabled={isLoading}>
-                    {isLoading ? 'Sending...' : 'Ask'}
+                    {isLoading ? 'Отправка...' : 'Спросить'}
                 </button>
             </form>
 
