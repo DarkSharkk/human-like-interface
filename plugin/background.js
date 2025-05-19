@@ -51,7 +51,7 @@ async function askGigaChat(question) {
                 messages: [
                     {
                         role: "user",
-                        content: question
+                        content: `${question} Ответ должен содержать не более 80 слов.`
                     }
                 ],
                 temperature: 0.7,
